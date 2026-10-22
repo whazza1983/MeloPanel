@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MeloPanel</title>
+  <link rel="icon" type="image/png" href="/static/img/favicon.png">
+  <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="login-body">
+  <form class="login-card" id="login-form">
+    <div class="login-logo">
+      <img src="/static/img/logo-full.webp" alt="MeloPanel">
+      <small data-i18n="brand.tagline"></small>
+    </div>
+    <label><span data-i18n="login.username"></span>
+      <input name="username" autocomplete="username" required autofocus>
+    </label>
+    <label><span data-i18n="login.password"></span>
+      <input name="password" type="password" autocomplete="current-password" required>
+    </label>
+    <p class="form-error" id="login-error" hidden></p>
+    <button class="btn btn-primary btn-block" type="submit" data-i18n="login.submit"></button>
+    <div class="seg lang-switch" style="justify-self:center">
+      <button type="button" data-lang-btn="de">DE</button>
+      <button type="button" data-lang-btn="en">EN</button>
+    </div>
+  </form>
+  <script src="/static/i18n.js"></script>
+  <script src="/static/pwtoggle.js"></script>
+  <script>
+    const form = document.getElementById('login-form');
+    const errorEl = document.getElementById('login-error');
+    document.title = `${t('login.title')} · MeloPanel`;
+    applyI18n();
+    document.querySelectorAll('[data-lang-btn]').forEach((b) => b.addEventListener('click', () => {
+      setLang(b.dataset.langBtn);
+      applyI18n();
+      document.title = `${t('login.title')} · MeloPanel`;
+    }));
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      const data = Object.fromEntries(new FormData(form));
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Lang': LANG },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        location.href = '/';
+      } else {
+        const body = await res.json().catch(() => ({}));
+        errorEl.textContent = typeof body.detail === 'string' ? body.detail : t('login.failed');
+        errorEl.hidden = false;
+      }
+    });
+  </script>
+</body>
+</html>

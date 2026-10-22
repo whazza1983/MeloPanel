@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MeloPanel</title>
+  <link rel="icon" type="image/png" href="/static/img/favicon.png">
+  <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
+  <meta name="theme-color" content="#03060f">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="/static/img/logo-icon.webp" alt="">
+        <span class="brand-text"><b>MeloPanel</b><small data-i18n="brand.tagline"></small></span>
+      </div>
+      <nav class="nav">
+        <a href="#/albums" data-nav="albums"><span data-i18n="nav.albums"></span></a>
+        <a href="#/search" data-nav="search"><span data-i18n="nav.search"></span></a>
+        <a href="#/artists" data-nav="artists"><span data-i18n="nav.artists"></span></a>
+        <a href="#/playlists" data-nav="playlists"><span data-i18n="nav.playlists"></span></a>
+        <a href="#/radio" data-nav="radio"><span data-i18n="nav.radio"></span></a>
+        <a href="#/favs" data-nav="favs"><span data-i18n="nav.favs"></span></a>
+        <a href="#/queue" data-nav="queue"><span data-i18n="nav.queue"></span> <span class="badge" id="queue-count">0</span></a>
+        <a href="#/stats" data-nav="stats"><span data-i18n="nav.stats"></span></a>
+        <a href="#/admin" data-nav="admin" data-admin hidden><span data-i18n="nav.users"></span></a>
+        <a href="#/bot" data-nav="bot" data-admin hidden><span data-i18n="nav.bot"></span></a>
+        <a href="#/schedule" data-nav="schedule" data-admin hidden><span data-i18n="nav.schedule"></span></a>
+        <a href="#/activity" data-nav="activity" data-admin hidden><span data-i18n="nav.activity"></span></a>
+        <a href="#/account" data-nav="account"><span data-i18n="nav.account"></span></a>
+      </nav>
+      <div class="sidebar-foot">
+        <span id="me-name"></span>
+        <div class="seg lang-switch">
+          <button data-lang-btn="de">DE</button>
+          <button data-lang-btn="en">EN</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="logout" data-i18n="logout"></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="btn btn-ghost icon-btn menu-btn" id="menu-toggle" data-i18n-aria="nav.menu">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+        </button>
+        <div class="voice">
+          <span class="dot" id="voice-dot"></span>
+          <select id="channel-select" data-i18n-aria="voice.channel"></select>
+          <button class="btn btn-sm" id="join-btn" data-i18n="voice.join"></button>
+          <button class="btn btn-sm btn-ghost" id="leave-btn" data-i18n="voice.leave" data-i18n-title="voice.leaveTitle"></button>
+        </div>
+      </header>
+      <section class="view" id="view"></section>
+    </main>
+  </div>
+
+  <footer class="playerbar">
+    <div class="pb-track">
+      <img class="pb-cover" id="pb-cover" alt="" hidden>
+      <div class="pb-cover pb-cover-empty" id="pb-cover-empty"></div>
+      <div class="pb-meta">
+        <div class="pb-title" id="pb-title"></div>
+        <div class="pb-artist" id="pb-artist"></div>
+        <a class="pb-program" id="pb-program" href="#/queue" hidden></a>
+      </div>
+    </div>
+    <div class="pb-center">
+      <div class="pb-controls">
+        <button class="icon-btn" data-control="shuffle" data-i18n-title="pb.shuffle">
+          <svg viewBox="0 0 24 24"><path d="M10.6 9.2 5.4 4 4 5.4l5.2 5.2 1.4-1.4zM14.5 4l2 2L4 18.6 5.4 20 18 7.5l2 2V4h-5.5zm.3 9.4-1.4 1.4 3.1 3.1-2 2.1H20v-5.5l-2 2-3.2-3.1z"/></svg>
+        </button>
+        <button class="icon-btn" data-control="previous" data-i18n-title="pb.previous">
+          <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button class="icon-btn play-btn" data-control="toggle" data-i18n-title="pb.playPause" id="play-btn">
+          <svg viewBox="0 0 24 24" id="play-icon"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="icon-btn" data-control="skip" data-i18n-title="pb.next">
+          <svg viewBox="0 0 24 24"><path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        </button>
+        <button class="icon-btn" id="loop-btn">
+          <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+          <span class="loop-one" id="loop-one" hidden>1</span>
+        </button>
+      </div>
+      <div class="pb-progress">
+        <span class="live-badge" id="pb-live" hidden>LIVE</span>
+        <span id="pb-pos">0:00</span>
+        <input type="range" id="pb-seek" min="0" max="0" value="0" step="1" data-i18n-aria="pb.position">
+        <span id="pb-dur">0:00</span>
+      </div>
+    </div>
+    <div class="pb-right">
+      <button class="icon-btn" data-control="stop" data-i18n-title="pb.stop">
+        <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+      </button>
+      <svg viewBox="0 0 24 24" class="vol-icon"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+      <input type="range" id="volume" min="0" max="100" value="50" data-i18n-aria="pb.volume">
+    </div>
+  </footer>
+
+  <div class="toasts" id="toasts"></div>
+  <script src="/static/i18n.js"></script>
+  <script src="/static/pwtoggle.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

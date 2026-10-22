@@ -1,0 +1,6 @@
+﻿# Local settings and data – never commit these
+.env
+data/
+__pycache__/
+*.pyc
+*.zip

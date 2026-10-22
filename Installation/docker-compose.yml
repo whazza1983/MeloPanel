@@ -1,0 +1,27 @@
+services:
+  melopanel:
+    build: .
+    container_name: melopanel
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Inside Docker: listen on all container interfaces and
+      # reach Navidrome directly over the shared Docker network
+      WEB_HOST: 0.0.0.0
+      WEB_PORT: "8080"
+      NAVIDROME_URL: http://navidrome:4533
+      # The port is only published locally, so requests always come through the reverse proxy
+      TRUSTED_PROXIES: "*"
+    ports:
+      # Local only – for a domain behind a reverse proxy (Apache/Nginx, recommended).
+      # Without a domain, direct IP access: "8095:8080" (see the guide, step 6, option B)
+      - "127.0.0.1:8095:8080"
+    volumes:
+      - ./data:/app/data
+    networks:
+      - navidrome
+
+networks:
+  navidrome:
+    name: navidrome_default
+    external: true
