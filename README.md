@@ -41,8 +41,9 @@
 invite it with the scopes `bot` and `applications.commands`).
 
 ```bash
-# 1. Copy the contents of the Installation folder to the server
-cd /opt/melopanel
+# 1. Download
+git clone https://github.com/whazza1983/MeloPanel.git /opt/melopanel
+cd /opt/melopanel/Installation
 
 # 2. Create and fill in the settings
 cp .env.example .env
@@ -51,6 +52,9 @@ nano .env          # DISCORD_TOKEN, DISCORD_GUILD_ID, NAVIDROME_USER/PASSWORD, S
 # 3. Start
 docker compose up -d --build
 docker compose logs -f
+
+# Later: update to the latest version
+git pull && docker compose up -d --build
 ```
 
 The panel is then available at `http://127.0.0.1:8095` on the server – put it behind a reverse proxy
@@ -71,8 +75,8 @@ features and Discord commands, troubleshooting – is covered in the
 
 ## Kurz auf Deutsch
 
-MeloPanel ist ein Discord-Musikbot mit Webpanel für Navidrome. Inhalt von `Installation/` auf den Server
-kopieren, `.env.example` zu `.env` kopieren und ausfüllen, `docker compose up -d --build` – fertig.
+MeloPanel ist ein Discord-Musikbot mit Webpanel für Navidrome. Mit `git clone` auf den Server holen,
+im Ordner `Installation` die `.env.example` zu `.env` kopieren und ausfüllen, `docker compose up -d --build` – fertig.
 Alle Details stehen in der **[Anleitung](https://instructions.whazza.de/melopanel/)** (Deutsch & Englisch,
 oben links umschaltbar).
 
