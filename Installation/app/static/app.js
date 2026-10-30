@@ -1002,6 +1002,11 @@ async function viewBot() {
           <input type="time" id="dj-from" value="${esc(s.dj_hours?.from || '20:00')}">
           <span>${t('bot.djHoursTo')}</span>
           <input type="time" id="dj-to" value="${esc(s.dj_hours?.to || '23:00')}">
+          <label for="dj-outside" class="muted">${t('bot.djOutside')}</label>
+          <select id="dj-outside">
+            <option value="admins" ${s.dj_hours?.outside !== 'all' ? 'selected' : ''}>${t('bot.djOutsideAdmins')}</option>
+            <option value="all" ${s.dj_hours?.outside === 'all' ? 'selected' : ''}>${t('bot.djOutsideAll')}</option>
+          </select>
         </div>
       </div>
       <div class="panel">
@@ -1058,7 +1063,8 @@ async function viewBot() {
       channel_id: $('#bot-channel').value || null,
       normalize: $('#opt-normalize').checked,
       presence: $('#opt-presence').checked,
-      dj_hours: $('#opt-djhours').checked ? { from: $('#dj-from').value, to: $('#dj-to').value } : null,
+      dj_hours: $('#opt-djhours').checked
+        ? { from: $('#dj-from').value, to: $('#dj-to').value, outside: $('#dj-outside').value } : null,
     };
     const resync = JSON.stringify([...body.disabled].sort()) !== JSON.stringify([...s.disabled].sort());
     btn.disabled = true;

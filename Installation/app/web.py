@@ -92,6 +92,7 @@ class AddBody(BaseModel):
 class DjHours(BaseModel):
     from_: str = Field(alias="from", pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
     to: str = Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    outside: str = Field(default="admins", pattern="^(admins|all)$")   # who may outside the window
 
 
 class BotSettingsBody(BaseModel):
@@ -370,7 +371,8 @@ def create_app(config: Config, db: Database, bot: MusicBot) -> FastAPI:
             "channel_id": body.channel_id or None,
             "normalize": body.normalize,
             "presence": body.presence,
-            "dj_hours": {"from": body.dj_hours.from_, "to": body.dj_hours.to} if body.dj_hours else None,
+            "dj_hours": ({"from": body.dj_hours.from_, "to": body.dj_hours.to, "outside": body.dj_hours.outside}
+                         if body.dj_hours else None),
         }
         old = bot.settings
         try:

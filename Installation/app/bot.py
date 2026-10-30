@@ -204,10 +204,15 @@ class MusicBot(discord.Client):
         if s["channel_id"] and str(interaction.channel_id) != str(s["channel_id"]):
             return await deny(bt(lang, "wrong_channel", channel=s["channel_id"]))
 
-        if name in s["dj_commands"] and self.dj_restricted_now():
-            # With DJ hours set, the hint names the window
+        if name in s["dj_commands"]:
+            # With DJ hours set, the DJ role only counts within them;
+            # outside, the commands are either open to everyone or reserved for server admins
             hours = s["dj_hours"]
-            suffix = bt(lang, "dj_hours", start=hours["from"], end=hours["to"]) if hours else ""
+            suffix = self.dj_hours_hint(lang)
+            if not self.dj_hours_now():
+                if hours.get("outside") == "all":
+                    return True
+                return await deny(bt(lang, "dj_outside_hours", start=hours["from"], end=hours["to"]))
             # Without a DJ role, "DJ only" commands are reserved for server admins
             if not s["dj_role_id"]:
                 return await deny(bt(lang, "admin_only") + suffix)
@@ -216,12 +221,20 @@ class MusicBot(discord.Client):
                 return await deny(bt(lang, "dj_only", role=s["dj_role_id"]) + suffix)
         return True
 
-    def dj_restricted_now(self) -> bool:
-        """Whether "DJ only" applies right now: always, or only within the DJ hours if set."""
+    def dj_hours_now(self) -> bool:
+        """Whether the DJ role may use "DJ only" commands right now: always, or only within the DJ hours."""
         hours = self.settings.get("dj_hours")
         if not hours:
             return True
         return in_time_window(self.scheduler.now().strftime("%H:%M"), hours["from"], hours["to"])
+
+    def dj_hours_hint(self, lang: str) -> str:
+        """" (from … to …, otherwise …)" when DJ hours are set, else empty."""
+        hours = self.settings.get("dj_hours")
+        if not hours:
+            return ""
+        key = "dj_hours_all" if hours.get("outside") == "all" else "dj_hours_admins"
+        return bt(lang, key, start=hours["from"], end=hours["to"])
 
     async def close(self) -> None:
         # On shutdown the bot disconnects itself from the voice channel. That must not overwrite
@@ -674,10 +687,8 @@ def register_commands(bot: MusicBot) -> None:
         # Who may use the 🔒 commands, and where
         notes = []
         if any("🔒" in line for lines in groups.values() for line in lines):
-            hours = s.get("dj_hours")
             who = f"<@&{s['dj_role_id']}>" if s["dj_role_id"] else bt(lang, "help_admins")
-            notes.append(bt(lang, "help_dj", who=who)
-                         + (bt(lang, "dj_hours", start=hours["from"], end=hours["to"]) if hours else ""))
+            notes.append(bt(lang, "help_dj", who=who) + bot.dj_hours_hint(lang))
         if s["channel_id"]:
             notes.append(bt(lang, "help_channel", channel=s["channel_id"]))
         if notes:

@@ -210,7 +210,7 @@ input[type=range] { padding: 0; border: 0; background: transparent; accent-color
 .switch-row .muted { font-size: .85rem; }
 .dj-hours { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .dj-hours[hidden] { display: none; }
-.dj-hours input[type=time] { width: auto; }
+.dj-hours input[type=time], .dj-hours select { width: auto; }
 
 /* Statistics */
 .stat-tiles { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
