@@ -173,7 +173,7 @@ def create_app(config: Config, db: Database, bot: MusicBot) -> FastAPI:
         # Make browsers revalidate panel files on every use (ETag) so updates take effect immediately
         response = await call_next(request)
         path = request.url.path
-        if path.startswith("/static/") or path in ("/", "/login"):
+        if path.startswith("/static/") or path in ("/", "/login", "/dj"):
             response.headers["Cache-Control"] = "no-cache"
         return response
 
@@ -236,6 +236,11 @@ def create_app(config: Config, db: Database, bot: MusicBot) -> FastAPI:
     @app.get("/login", include_in_schema=False)
     async def login_page():
         return FileResponse(STATIC_DIR / "login.html")
+
+    @app.get("/dj", include_in_schema=False)
+    async def dj_guide():
+        # Command guide for DJs, linked from /help; public, it contains no server data
+        return FileResponse(STATIC_DIR / "dj.html")
 
     @app.post("/api/login")
     async def login(body: LoginBody, request: Request):

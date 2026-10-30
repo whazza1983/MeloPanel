@@ -30,7 +30,7 @@
 - 📊 **Statistics & activity log** – most played tracks and artists, and who did what when
 - 🔊 **Loudness normalization** and the current track as the bot's **Discord status**
 - 🔐 **Permissions** – panel accounts with an admin role; DJ role (always or only at set times) and bot channel in Discord
-- ❓ **`/help`** – lists all enabled commands in the user's language
+- ❓ **`/help`** – lists all enabled commands in the user's language and links to a short DJ guide (`/dj` on the panel)
 - 🌍 **German & English** – in the panel and in Discord (follows each user's language)
 - ❤️‍🩹 **Health endpoint** for uptime monitors such as Uptime Kuma
 - 📱 Works on desktop and mobile

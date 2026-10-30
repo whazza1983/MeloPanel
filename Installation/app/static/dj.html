@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MeloPanel – DJ</title>
+  <link rel="icon" type="image/png" href="/static/img/favicon.png">
+  <script>
+    // Same language as the panel (saved choice, otherwise the browser language)
+    (function () {
+      let lang = '';
+      try { lang = localStorage.getItem('nd_lang') || ''; } catch (e) { /* storage not available */ }
+      if (lang !== 'de' && lang !== 'en') lang = (navigator.language || '').toLowerCase().startsWith('de') ? 'de' : 'en';
+      document.documentElement.dataset.lang = lang;
+      document.documentElement.lang = lang;
+    })();
+  </script>
+  <style>
+    :root {
+      --bg: #0f1115; --bg-2: #161922; --bg-3: #1e2230; --line: #2a2f3f;
+      --text: #e8eaf0; --muted: #9097a8; --accent: #7c6cf2; --accent-2: #9a8cff;
+      color-scheme: dark;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f6fa; --bg-2: #ffffff; --bg-3: #eceef5; --line: #dde0ea;
+        --text: #1b1e27; --muted: #646b7d; --accent: #5b4ae0; --accent-2: #4a3acb;
+        color-scheme: light;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    html[data-lang="de"] [data-l="en"], html[data-lang="en"] [data-l="de"] { display: none !important; }
+    .wrap { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    header img { height: 72px; }
+    .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .lang button {
+      background: none; border: 0; color: var(--muted); padding: 6px 12px; cursor: pointer; font: inherit;
+    }
+    html[data-lang="de"] .lang [data-set="de"], html[data-lang="en"] .lang [data-set="en"] {
+      background: var(--accent); color: #fff;
+    }
+    h1 { font-size: 1.6rem; margin: 24px 0 4px; }
+    h2 { font-size: 1.15rem; margin: 32px 0 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+    p { margin: 8px 0; }
+    .muted { color: var(--muted); }
+    nav.toc { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 0; }
+    nav.toc a {
+      color: var(--text); text-decoration: none; background: var(--bg-3); border-radius: 999px;
+      padding: 4px 12px; font-size: .9rem;
+    }
+    nav.toc a:hover { background: var(--accent); color: #fff; }
+    code {
+      background: var(--bg-3); border: 1px solid var(--line); border-radius: 6px;
+      padding: 1px 6px; font: .92em ui-monospace, "Cascadia Mono", Consolas, monospace; white-space: nowrap;
+    }
+    .cmd { background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 10px 0; }
+    .cmd > b:first-child { display: block; margin-bottom: 4px; }
+    .ex { margin: 6px 0 0; padding-left: 18px; }
+    .ex li { margin: 3px 0; }
+    .tip {
+      border-left: 3px solid var(--accent); background: var(--bg-2); border-radius: 0 10px 10px 0;
+      padding: 10px 14px; margin: 12px 0;
+    }
+    table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+    th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    .table-wrap { overflow-x: auto; }
+    ol.steps { padding-left: 20px; }
+    ol.steps li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="/static/img/logo-full.webp" alt="MeloPanel">
+    <div class="lang"><button data-set="de">DE</button><button data-set="en">EN</button></div>
+  </header>
+
+  <!-- ==================== Deutsch ==================== -->
+  <div data-l="de">
+    <h1>DJ-Anleitung</h1>
+    <p class="muted">Alles, was du als DJ für den Musikbot in Discord brauchst.</p>
+    <nav class="toc">
+      <a href="#start">So geht's</a><a href="#musik">Musik</a><a href="#radio">Radio</a>
+      <a href="#dauer">Dauerschleife</a><a href="#steuern">Steuern</a><a href="#springen">Springen</a>
+      <a href="#anzeige">Anzeigen</a><a href="#probleme">Probleme</a>
+    </nav>
+
+    <h2 id="start">So geht's</h2>
+    <ol class="steps">
+      <li>Geh in einen <b>Sprachkanal</b>, falls der Bot noch nirgends ist – er kommt dann von selbst zu dir.</li>
+      <li>Tippe im Textkanal <code>/</code> und wähle den Befehl des Bots aus.</li>
+      <li>Fang an zu tippen: Der Bot zeigt nach 2 Buchstaben eine <b>Liste mit Vorschlägen</b>.</li>
+      <li><b>Klick einen Vorschlag an</b> und drück <kbd>Enter</kbd>.</li>
+    </ol>
+    <div class="tip"><b>Wichtig:</b> Wählst du einen Vorschlag aus der Liste, spielt der Bot <b>genau diesen</b> Titel.
+      Drückst du einfach <kbd>Enter</kbd>, ohne etwas auszuwählen, nimmt er den <b>ersten Treffer</b> der Suche – das kann auch ein anderer Titel sein.</div>
+    <p class="muted">Die Befehle heißen so, wie dein Discord eingestellt ist: auf Deutsch z.&nbsp;B. <code>/favoriten</code>, auf Englisch <code>/favorites</code>. Diese Seite zeigt die deutschen Namen.</p>
+
+    <h2 id="musik">Musik abspielen</h2>
+    <div class="cmd"><b><code>/play titel</code> – einen Titel spielen</b>
+      Der Titel wird hinten an die Warteschlange angestellt. Läuft gerade nichts, startet er sofort.
+      <ul class="ex">
+        <li><code>/play titel: paradise</code> → in der Liste <i>Phil Collins – Another Day in Paradise</i> anklicken</li>
+        <li>Genauer suchen mit Künstler <b>und</b> Titel: <code>/play titel: collins paradise</code></li>
+        <li><b>Sofort</b> spielen statt hinten anstellen: zusätzlich die Option <code>sofort</code> wählen und auf <code>True</code> setzen</li>
+      </ul>
+    </div>
+    <div class="cmd"><b><code>/album album</code> – ganzes Album</b>
+      <ul class="ex"><li><code>/album album: but seriously</code> → Album aus der Liste anklicken</li></ul>
+    </div>
+    <div class="cmd"><b><code>/playlist playlist</code> – Navidrome-Playlist</b>
+      <ul class="ex"><li>Die Liste zeigt alle Playlists – einfach eine anklicken.</li></ul>
+    </div>
+    <div class="cmd"><b><code>/favoriten liste</code> – Favoritenliste aus dem Webpanel</b>
+      Spielt die Liste <b>einmal</b> durch.
+      <ul class="ex"><li>Gemischt: zusätzlich <code>mischen</code> auf <code>True</code></li></ul>
+    </div>
+    <div class="cmd"><b><code>/random</code> – zufällige Titel</b>
+      <ul class="ex"><li><code>/random</code> = 20 Titel · <code>/random anzahl: 50</code> = 50 Titel (1–100)</li></ul>
+    </div>
+
+    <h2 id="radio">Radio</h2>
+    <div class="cmd"><b><code>/radio sender</code> – Radiosender hören</b>
+      Startet den Sender <b>sofort</b>. Er läuft, bis jemand <code>/skip</code> macht oder einen Titel mit <code>/play</code> anstellt –
+      dann ist das Radio vorbei.
+      <ul class="ex"><li><code>/radio sender:</code> → Sender aus der Liste anklicken</li></ul>
+    </div>
+    <p>Soll der Sender <b>dauerhaft</b> laufen, nimm <code>/dauerschleife radio</code> (siehe unten): Dann spielen angestellte Titel kurz dazwischen, und danach kommt das Radio von selbst wieder.</p>
+
+    <h2 id="dauer">Dauerschleife</h2>
+    <p>Die Dauerschleife läuft, wenn die Warteschlange leer ist – und hört nicht von selbst auf. Titel, die jemand mit <code>/play</code> dazwischen anstellt, kommen zuerst dran, danach geht die Dauerschleife weiter.</p>
+    <div class="cmd"><b><code>/dauerschleife liste</code> – Favoritenliste endlos</b>
+      <ul class="ex"><li><code>modus</code>: <i>Reihenfolge</i> oder <i>Gemischt</i></li></ul>
+    </div>
+    <div class="cmd"><b><code>/dauerschleife radio</code> – Radiosender als Dauerprogramm</b></div>
+    <div class="cmd"><b><code>/dauerschleife stop</code> – Dauerschleife beenden</b>
+      Ein laufender Titel spielt noch zu Ende, ein Radiosender hört sofort auf. Die Warteschlange bleibt.</div>
+
+    <h2 id="steuern">Steuern</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Befehl</th><th>Was passiert</th></tr>
+      <tr><td><code>/skip</code></td><td>Nächster Titel</td></tr>
+      <tr><td><code>/previous</code></td><td>In den ersten 5 Sekunden: vorheriger Titel. Danach: aktueller Titel von vorne.</td></tr>
+      <tr><td><code>/pause</code> · <code>/resume</code></td><td>Pausieren · weiterspielen</td></tr>
+      <tr><td><code>/volume prozent</code></td><td>Lautstärke 0–100, z.&nbsp;B. <code>/volume prozent: 40</code></td></tr>
+      <tr><td><code>/loop modus</code></td><td><i>Aus</i> · <i>Titel</i> (aktuellen Titel wiederholen) · <i>Warteschlange</i> (alles wiederholen)</td></tr>
+      <tr><td><code>/mischen</code></td><td>Warteschlange zufällig mischen</td></tr>
+      <tr><td><code>/stop</code></td><td>Stoppt <b>alles</b>: Titel, Warteschlange und Dauerschleife</td></tr>
+      <tr><td><code>/join</code> · <code>/leave</code></td><td>Bot in deinen Sprachkanal holen · Bot trennen</td></tr>
+    </table></div>
+
+    <h2 id="springen">Im Titel springen</h2>
+    <div class="cmd"><b><code>/seek zeit</code> – zu einer Stelle springen</b>
+      <ul class="ex">
+        <li><code>/seek zeit: 1:30</code> → 1 Minute 30 Sekunden</li>
+        <li><code>/seek zeit: 90</code> → 90 Sekunden (also auch 1:30)</li>
+        <li><code>/seek zeit: 1:02:30</code> → 1 Stunde 2 Minuten 30 Sekunden</li>
+        <li><code>/seek zeit: 0</code> → zurück zum Anfang</li>
+      </ul>
+      <p class="muted">Funktioniert nicht beim Radio – live kann man nicht springen.</p>
+    </div>
+
+    <h2 id="anzeige">Anzeigen</h2>
+    <div class="table-wrap"><table>
+      <tr><td><code>/nowplaying</code></td><td>Was gerade läuft, Position, Lautstärke, wer es eingereiht hat</td></tr>
+      <tr><td><code>/queue</code></td><td>Die nächsten Titel und die laufende Dauerschleife</td></tr>
+      <tr><td><code>/hilfe</code></td><td>Liste aller Befehle (siehst nur du)</td></tr>
+    </table></div>
+
+    <h2 id="probleme">Wenn etwas nicht klappt</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Meldung / Problem</th><th>Lösung</th></tr>
+      <tr><td>Falscher Titel läuft</td><td><code>/skip</code> und beim nächsten Mal einen <b>Vorschlag aus der Liste anklicken</b>, statt nur Enter zu drücken.</td></tr>
+      <tr><td>„Dafür brauchst du die Rolle …“</td><td>Der Befehl ist nur für DJs – dir fehlt die Rolle.</td></tr>
+      <tr><td>„DJ-Befehle gehen nur von … bis … Uhr“</td><td>Gerade ist keine DJ-Zeit. Zur genannten Uhrzeit nochmal versuchen.</td></tr>
+      <tr><td>„Bitte benutze die Bot-Befehle in …“</td><td>Befehle nur im genannten Textkanal benutzen.</td></tr>
+      <tr><td>„Geh zuerst in einen Sprachkanal“</td><td>Der Bot ist in keinem Kanal – erst selbst einen Sprachkanal betreten.</td></tr>
+      <tr><td>Befehl taucht nicht auf</td><td>Er ist im Panel ausgeschaltet. Discord einmal mit <kbd>Strg</kbd>+<kbd>R</kbd> neu laden.</td></tr>
+      <tr><td>Keine Vorschläge beim Tippen</td><td>Mindestens 2 Buchstaben tippen und kurz warten.</td></tr>
+    </table></div>
+  </div>
+
+  <!-- ==================== English ==================== -->
+  <div data-l="en">
+    <h1>DJ guide</h1>
+    <p class="muted">Everything you need as a DJ for the music bot in Discord.</p>
+    <nav class="toc">
+      <a href="#en-start">Basics</a><a href="#en-music">Music</a><a href="#en-radio">Radio</a>
+      <a href="#en-nonstop">Nonstop</a><a href="#en-control">Controls</a><a href="#en-seek">Seeking</a>
+      <a href="#en-info">Info</a><a href="#en-problems">Problems</a>
+    </nav>
+
+    <h2 id="en-start">Basics</h2>
+    <ol class="steps">
+      <li>Join a <b>voice channel</b> if the bot isn't in one yet – it will then come to you by itself.</li>
+      <li>Type <code>/</code> in the text channel and pick the bot's command.</li>
+      <li>Start typing: after 2 letters the bot shows a <b>list of suggestions</b>.</li>
+      <li><b>Click a suggestion</b> and press <kbd>Enter</kbd>.</li>
+    </ol>
+    <div class="tip"><b>Important:</b> If you pick a suggestion from the list, the bot plays <b>exactly that</b> track.
+      If you just press <kbd>Enter</kbd> without picking one, it takes the <b>first search result</b> – which may be a different track.</div>
+    <p class="muted">Command names follow your Discord language: in English e.g. <code>/favorites</code>, in German <code>/favoriten</code>. This page shows the English names.</p>
+
+    <h2 id="en-music">Playing music</h2>
+    <div class="cmd"><b><code>/play title</code> – play a track</b>
+      The track is added to the end of the queue. If nothing is playing, it starts right away.
+      <ul class="ex">
+        <li><code>/play title: paradise</code> → click <i>Phil Collins – Another Day in Paradise</i> in the list</li>
+        <li>Search more precisely with artist <b>and</b> title: <code>/play title: collins paradise</code></li>
+        <li>Play <b>now</b> instead of queueing: also pick the <code>now</code> option and set it to <code>True</code></li>
+      </ul>
+    </div>
+    <div class="cmd"><b><code>/album album</code> – a whole album</b>
+      <ul class="ex"><li><code>/album album: but seriously</code> → click the album in the list</li></ul>
+    </div>
+    <div class="cmd"><b><code>/playlist playlist</code> – a Navidrome playlist</b>
+      <ul class="ex"><li>The list shows all playlists – just click one.</li></ul>
+    </div>
+    <div class="cmd"><b><code>/favorites list</code> – a favorites list from the web panel</b>
+      Plays the list <b>once</b>.
+      <ul class="ex"><li>Shuffled: also set <code>shuffle</code> to <code>True</code></li></ul>
+    </div>
+    <div class="cmd"><b><code>/random</code> – random tracks</b>
+      <ul class="ex"><li><code>/random</code> = 20 tracks · <code>/random count: 50</code> = 50 tracks (1–100)</li></ul>
+    </div>
+
+    <h2 id="en-radio">Radio</h2>
+    <div class="cmd"><b><code>/radio station</code> – listen to a radio station</b>
+      Starts the station <b>right away</b>. It runs until someone uses <code>/skip</code> or queues a track with <code>/play</code> –
+      then the radio is over.
+      <ul class="ex"><li><code>/radio station:</code> → click a station in the list</li></ul>
+    </div>
+    <p>To keep a station running <b>permanently</b>, use <code>/nonstop radio</code> (see below): queued tracks then play in between, and the radio comes back by itself afterwards.</p>
+
+    <h2 id="en-nonstop">Nonstop</h2>
+    <p>Nonstop plays whenever the queue is empty – and doesn't stop by itself. Tracks someone adds with <code>/play</code> in between come first, then nonstop carries on.</p>
+    <div class="cmd"><b><code>/nonstop list</code> – a favorites list on endless repeat</b>
+      <ul class="ex"><li><code>mode</code>: <i>In order</i> or <i>Shuffled</i></li></ul>
+    </div>
+    <div class="cmd"><b><code>/nonstop radio</code> – a radio station as a permanent program</b></div>
+    <div class="cmd"><b><code>/nonstop stop</code> – end nonstop playback</b>
+      A playing track finishes, a radio station stops right away. The queue stays.</div>
+
+    <h2 id="en-control">Controls</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Command</th><th>What it does</th></tr>
+      <tr><td><code>/skip</code></td><td>Next track</td></tr>
+      <tr><td><code>/previous</code></td><td>Within the first 5 seconds: previous track. After that: restart the current track.</td></tr>
+      <tr><td><code>/pause</code> · <code>/resume</code></td><td>Pause · continue</td></tr>
+      <tr><td><code>/volume percent</code></td><td>Volume 0–100, e.g. <code>/volume percent: 40</code></td></tr>
+      <tr><td><code>/loop mode</code></td><td><i>Off</i> · <i>Track</i> (repeat the current track) · <i>Queue</i> (repeat everything)</td></tr>
+      <tr><td><code>/shuffle</code></td><td>Shuffle the queue</td></tr>
+      <tr><td><code>/stop</code></td><td>Stops <b>everything</b>: track, queue and nonstop</td></tr>
+      <tr><td><code>/join</code> · <code>/leave</code></td><td>Bring the bot into your voice channel · disconnect it</td></tr>
+    </table></div>
+
+    <h2 id="en-seek">Jumping within a track</h2>
+    <div class="cmd"><b><code>/seek time</code> – jump to a position</b>
+      <ul class="ex">
+        <li><code>/seek time: 1:30</code> → 1 minute 30 seconds</li>
+        <li><code>/seek time: 90</code> → 90 seconds (the same as 1:30)</li>
+        <li><code>/seek time: 1:02:30</code> → 1 hour 2 minutes 30 seconds</li>
+        <li><code>/seek time: 0</code> → back to the start</li>
+      </ul>
+      <p class="muted">Doesn't work on the radio – you can't jump in a live stream.</p>
+    </div>
+
+    <h2 id="en-info">Info</h2>
+    <div class="table-wrap"><table>
+      <tr><td><code>/nowplaying</code></td><td>What's playing, position, volume, who added it</td></tr>
+      <tr><td><code>/queue</code></td><td>The upcoming tracks and the running nonstop playback</td></tr>
+      <tr><td><code>/help</code></td><td>List of all commands (only you see it)</td></tr>
+    </table></div>
+
+    <h2 id="en-problems">If something doesn't work</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Message / problem</th><th>Solution</th></tr>
+      <tr><td>Wrong track is playing</td><td><code>/skip</code>, and next time <b>click a suggestion from the list</b> instead of just pressing Enter.</td></tr>
+      <tr><td>“You need the … role for this.”</td><td>The command is for DJs only – you don't have the role.</td></tr>
+      <tr><td>“DJ commands are only available from … to …”</td><td>It's outside the DJ hours right now. Try again at the stated time.</td></tr>
+      <tr><td>“Please use bot commands in …”</td><td>Only use the commands in the named text channel.</td></tr>
+      <tr><td>“Join a voice channel first”</td><td>The bot isn't in any channel – join a voice channel yourself first.</td></tr>
+      <tr><td>A command doesn't show up</td><td>It's switched off in the panel. Reload Discord once with <kbd>Ctrl</kbd>+<kbd>R</kbd>.</td></tr>
+      <tr><td>No suggestions while typing</td><td>Type at least 2 letters and wait a moment.</td></tr>
+    </table></div>
+  </div>
+</div>
+<script>
+  document.querySelectorAll('[data-set]').forEach((b) => b.addEventListener('click', () => {
+    const l = b.dataset.set;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    try { localStorage.setItem('nd_lang', l); } catch (e) { /* storage not available */ }
+  }));
+</script>
+</body>
+</html>

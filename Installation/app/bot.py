@@ -691,6 +691,8 @@ def register_commands(bot: MusicBot) -> None:
             notes.append(bt(lang, "help_dj", who=who) + bot.dj_hours_hint(lang))
         if s["channel_id"]:
             notes.append(bt(lang, "help_channel", channel=s["channel_id"]))
+        if bot.config.panel_url:
+            notes.append(bt(lang, "help_guide", url=bot.config.panel_url.rstrip("/") + "/dj"))
         if notes:
             embed.description = "\n".join(notes)
         await interaction.response.send_message(embed=embed, ephemeral=True)

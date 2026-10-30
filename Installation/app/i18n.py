@@ -91,6 +91,7 @@ BOT = {
     "help_dj": ("🔒 = nur für {who}", "🔒 = only for {who}"),
     "help_admins": ("Server-Admins", "server admins"),
     "help_channel": ("Befehle bitte in <#{channel}> benutzen.", "Please use commands in <#{channel}>."),
+    "help_guide": ("📖 [Anleitung mit Beispielen]({url})", "📖 [Guide with examples]({url})"),
     "navidrome_error": ("Navidrome-Fehler: {error}", "Navidrome error: {error}"),
     "generic_error": ("Da ist etwas schiefgelaufen.", "Something went wrong."),
 }
