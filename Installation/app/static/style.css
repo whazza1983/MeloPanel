@@ -208,6 +208,9 @@ input[type=range] { padding: 0; border: 0; background: transparent; accent-color
 .switch-row { display: flex; gap: 12px; align-items: flex-start; margin: 12px 0; cursor: pointer; font-size: .92rem; }
 .switch-row .switch { flex: none; margin-top: 2px; }
 .switch-row .muted { font-size: .85rem; }
+.dj-hours { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dj-hours[hidden] { display: none; }
+.dj-hours input[type=time] { width: auto; }
 
 /* Statistics */
 .stat-tiles { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }

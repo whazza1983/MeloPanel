@@ -77,6 +77,15 @@ BOT = {
     "wrong_channel": ("Bitte benutze die Bot-Befehle in <#{channel}>.", "Please use bot commands in <#{channel}>."),
     "dj_only": ("Dafür brauchst du die Rolle <@&{role}>.", "You need the <@&{role}> role for this."),
     "admin_only": ("Das dürfen nur Server-Admins.", "Only server admins can do that."),
+    "dj_hours": (" (gilt von {start} bis {end} Uhr)", " (applies from {start} to {end})"),
+    "help_title": ("🎵 Bot-Befehle", "🎵 Bot commands"),
+    "help_cat_play": ("Abspielen", "Playback"),
+    "help_cat_nonstop": ("Dauerschleife", "Nonstop"),
+    "help_cat_control": ("Steuerung", "Controls"),
+    "help_cat_info": ("Anzeige", "Info"),
+    "help_dj": ("🔒 = nur für {who}", "🔒 = only for {who}"),
+    "help_admins": ("Server-Admins", "server admins"),
+    "help_channel": ("Befehle bitte in <#{channel}> benutzen.", "Please use commands in <#{channel}>."),
     "navidrome_error": ("Navidrome-Fehler: {error}", "Navidrome error: {error}"),
     "generic_error": ("Da ist etwas schiefgelaufen.", "Something went wrong."),
 }
@@ -123,6 +132,7 @@ ERRORS_DE = {
     "Unknown command": "Unbekannter Befehl",
     "Role not found": "Rolle nicht gefunden",
     "Text channel not found": "Textkanal nicht gefunden",
+    "Start and end time must differ": "Start- und Endzeit müssen verschieden sein",
     "Please choose at least one weekday": "Bitte mindestens einen Wochentag wählen",
     "Entry not found": "Eintrag nicht gefunden",
 }
@@ -159,6 +169,7 @@ COMMANDS_DE = {
     "favorites": "favoriten",
     "nonstop": "dauerschleife",
     "list": "liste",
+    "help": "hilfe",
     # Parameter names
     "title": "titel",
     "now": "sofort",
@@ -205,6 +216,7 @@ COMMANDS_DE = {
     "Show the current track": "Zeigt den aktuellen Titel",
     "Show the queue": "Zeigt die Warteschlange",
     "Link to the web panel": "Link zum Webpanel",
+    "Show all commands": "Zeigt alle Befehle",
     # Choices
     "In order": "Reihenfolge",
     "Shuffled": "Gemischt",

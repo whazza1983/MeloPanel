@@ -996,6 +996,13 @@ async function viewBot() {
           ${data.roles.map((r) => `<option value="${esc(r.id)}" ${r.id === s.dj_role_id ? 'selected' : ''}>@${esc(r.name)}</option>`).join('')}
         </select>
         <div class="muted" style="font-size:.88rem">${t('bot.djHint')}</div>
+        <label class="switch-row"><input type="checkbox" class="switch" id="opt-djhours" ${s.dj_hours ? 'checked' : ''}>
+          <span><b>${t('bot.djHours')}</b><br><span class="muted">${t('bot.djHoursHint')}</span></span></label>
+        <div class="dj-hours" id="dj-hours" ${s.dj_hours ? '' : 'hidden'}>
+          <input type="time" id="dj-from" value="${esc(s.dj_hours?.from || '20:00')}">
+          <span>${t('bot.djHoursTo')}</span>
+          <input type="time" id="dj-to" value="${esc(s.dj_hours?.to || '23:00')}">
+        </div>
       </div>
       <div class="panel">
         <h2 style="margin-top:0">${t('bot.channel')}</h2>
@@ -1039,6 +1046,7 @@ async function viewBot() {
     cb.closest('tr').classList.toggle('off', !cb.checked);
   }));
   $('#dj-role').addEventListener('change', (e) => { $('#dj-inactive').hidden = Boolean(e.target.value); });
+  $('#opt-djhours').addEventListener('change', (e) => { $('#dj-hours').hidden = !e.target.checked; });
 
   $('#bot-save').addEventListener('click', async (e) => {
     const btn = e.currentTarget;
@@ -1050,6 +1058,7 @@ async function viewBot() {
       channel_id: $('#bot-channel').value || null,
       normalize: $('#opt-normalize').checked,
       presence: $('#opt-presence').checked,
+      dj_hours: $('#opt-djhours').checked ? { from: $('#dj-from').value, to: $('#dj-to').value } : null,
     };
     const resync = JSON.stringify([...body.disabled].sort()) !== JSON.stringify([...s.disabled].sort());
     btn.disabled = true;

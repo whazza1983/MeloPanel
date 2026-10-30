@@ -7,7 +7,7 @@ from discord import app_commands
 
 from .config import Config
 from .db import Database
-from .i18n import BotTranslator, bt, lang_of, translate_error
+from .i18n import COMMANDS_DE, BotTranslator, bt, lang_of, translate_error
 from .navidrome import Navidrome, NavidromeError, radio_track
 from .player import Player
 from .scheduler import Scheduler
@@ -23,34 +23,45 @@ COMMAND_CATEGORIES = {
     "join": "control", "leave": "control", "skip": "control", "previous": "control", "pause": "control",
     "resume": "control", "stop": "control", "volume": "control", "loop": "control", "shuffle": "control",
     "seek": "control",
-    "nowplaying": "info", "queue": "info", "panel": "info",
+    "nowplaying": "info", "queue": "info", "panel": "info", "help": "info",
 }
 
 # Default: everything is DJ-only (or server admins, as long as no DJ role is set);
-# only what is playing now and what comes next is open to everyone
-PUBLIC_COMMANDS = ("nowplaying", "queue")
+# only what is playing now, what comes next and the command list are open to everyone
+PUBLIC_COMMANDS = ("nowplaying", "queue", "help")
 DEFAULT_DJ_COMMANDS = [name for name in COMMAND_CATEGORIES if name not in PUBLIC_COMMANDS]
 
 
 def default_settings() -> dict:
     return {"disabled": [], "dj_role_id": None, "dj_commands": list(DEFAULT_DJ_COMMANDS), "channel_id": None,
-            "normalize": True, "presence": True}
+            "normalize": True, "presence": True, "dj_hours": None}
 
 
-def presence_text(state: dict) -> str:
-    """Text for the Discord status ("Listening to …")."""
+def in_time_window(now: str, start: str, end: str) -> bool:
+    """Whether "HH:MM" lies in [start, end); a window like 22:00–06:00 runs past midnight."""
+    if start <= end:
+        return start <= now < end
+    return now >= start or now < end
+
+
+def _clip(text: str, limit: int = 128) -> str:
+    return text if len(text) <= limit else text[:limit - 3] + "..."
+
+
+def presence_text(state: dict) -> tuple[str, str | None]:
+    """Discord status ("Listening to …"): the name, plus a second line shown in the profile card."""
     track = state.get("current")
     if not track:
-        return "Navidrome"
+        return "Navidrome", None
     if track.get("radio"):
-        text = f"📻 {track['title']}"
-        if track.get("nowPlaying"):
-            text += f" · {track['nowPlaying']}"
+        name = f"📻 {track['title']}"
+        line = f"🎵 {track['nowPlaying']}" if track.get("nowPlaying") else None
     else:
-        text = f"{track.get('title', '?')} – {track.get('artist', '?')}"
+        name = track.get("title") or "?"
+        line = " · ".join(p for p in (track.get("artist"), track.get("album")) if p) or None
     if state.get("paused"):
-        text = f"⏸ {text}"
-    return text if len(text) <= 128 else text[:125] + "..."
+        name = f"⏸ {name}"
+    return _clip(name), _clip(line) if line else None
 
 
 class GuardedTree(app_commands.CommandTree):
@@ -99,7 +110,7 @@ class MusicBot(discord.Client):
         self.player.normalize = self.settings["normalize"]
         self.scheduler = Scheduler(db, self.player, navidrome, config.timezone)
         self._restored = False
-        self._presence_shown: str | None = None
+        self._presence_shown: tuple[str, str | None] | None = None
         self._presence_task: asyncio.Task | None = None
         self.player.add_listener(self._on_player_state)
         self.tree.on_error = self.on_command_error
@@ -131,12 +142,13 @@ class MusicBot(discord.Client):
         await asyncio.sleep(0 if force else 2)
         if not self.is_ready():
             return
-        text = presence_text(self.player.state()) if self.settings["presence"] else "Navidrome"
-        if text == self._presence_shown and not force:
+        name, line = presence_text(self.player.state()) if self.settings["presence"] else ("Navidrome", None)
+        if (name, line) == self._presence_shown and not force:
             return
-        self._presence_shown = text
+        self._presence_shown = (name, line)
         try:
-            await self.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=text))
+            await self.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
+                                                                 name=name, state=line))
         except Exception as exc:
             log.debug("Discord status not updated: %s", exc)
 
@@ -192,14 +204,24 @@ class MusicBot(discord.Client):
         if s["channel_id"] and str(interaction.channel_id) != str(s["channel_id"]):
             return await deny(bt(lang, "wrong_channel", channel=s["channel_id"]))
 
-        if name in s["dj_commands"]:
+        if name in s["dj_commands"] and self.dj_restricted_now():
+            # With DJ hours set, the hint names the window
+            hours = s["dj_hours"]
+            suffix = bt(lang, "dj_hours", start=hours["from"], end=hours["to"]) if hours else ""
             # Without a DJ role, "DJ only" commands are reserved for server admins
             if not s["dj_role_id"]:
-                return await deny(bt(lang, "admin_only"))
+                return await deny(bt(lang, "admin_only") + suffix)
             roles = {str(r.id) for r in getattr(member, "roles", [])}
             if str(s["dj_role_id"]) not in roles:
-                return await deny(bt(lang, "dj_only", role=s["dj_role_id"]))
+                return await deny(bt(lang, "dj_only", role=s["dj_role_id"]) + suffix)
         return True
+
+    def dj_restricted_now(self) -> bool:
+        """Whether "DJ only" applies right now: always, or only within the DJ hours if set."""
+        hours = self.settings.get("dj_hours")
+        if not hours:
+            return True
+        return in_time_window(self.scheduler.now().strftime("%H:%M"), hours["from"], hours["to"])
 
     async def close(self) -> None:
         # On shutdown the bot disconnects itself from the voice channel. That must not overwrite
@@ -627,3 +649,37 @@ def register_commands(bot: MusicBot) -> None:
         lang = L(interaction)
         url = bot.config.panel_url or bt(lang, "no_panel_url")
         await interaction.response.send_message(bt(lang, "panel", url=url), ephemeral=True)
+
+    @tree.command(name="help", description="Show all commands")
+    async def help_(interaction: discord.Interaction):
+        lang = L(interaction)
+        s = bot.settings
+        de = lang == "de"
+        local = (lambda text: COMMANDS_DE.get(text, text)) if de else (lambda text: text)
+        # Only commands switched on in the panel, grouped like there
+        groups: dict[str, list[str]] = {}
+        for cmd in tree.get_commands():
+            if cmd.name in s["disabled"]:
+                continue
+            lock = " 🔒" if cmd.name in s["dj_commands"] else ""
+            subs = cmd.commands if isinstance(cmd, app_commands.Group) else [cmd]
+            for sub in subs:
+                path = f"{local(cmd.name)} {local(sub.name)}" if sub is not cmd else local(cmd.name)
+                groups.setdefault(COMMAND_CATEGORIES.get(cmd.name, "info"), []).append(
+                    f"`/{path}`{lock} – {local(sub.description)}")
+        embed = discord.Embed(title=bt(lang, "help_title"), color=0x6C5CE7)
+        for cat in ("play", "nonstop", "control", "info"):
+            if groups.get(cat):
+                embed.add_field(name=bt(lang, f"help_cat_{cat}"), value="\n".join(groups[cat])[:1024], inline=False)
+        # Who may use the 🔒 commands, and where
+        notes = []
+        if any("🔒" in line for lines in groups.values() for line in lines):
+            hours = s.get("dj_hours")
+            who = f"<@&{s['dj_role_id']}>" if s["dj_role_id"] else bt(lang, "help_admins")
+            notes.append(bt(lang, "help_dj", who=who)
+                         + (bt(lang, "dj_hours", start=hours["from"], end=hours["to"]) if hours else ""))
+        if s["channel_id"]:
+            notes.append(bt(lang, "help_channel", channel=s["channel_id"]))
+        if notes:
+            embed.description = "\n".join(notes)
+        await interaction.response.send_message(embed=embed, ephemeral=True)

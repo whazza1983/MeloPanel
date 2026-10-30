@@ -89,6 +89,11 @@ class AddBody(BaseModel):
     count: int = Field(default=20, ge=1, le=100)
 
 
+class DjHours(BaseModel):
+    from_: str = Field(alias="from", pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    to: str = Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+
+
 class BotSettingsBody(BaseModel):
     disabled: list[str] = []
     dj_role_id: str | None = None
@@ -96,6 +101,7 @@ class BotSettingsBody(BaseModel):
     channel_id: str | None = None
     normalize: bool = True
     presence: bool = True
+    dj_hours: DjHours | None = None
 
 
 class ScheduleEntry(BaseModel):
@@ -355,6 +361,8 @@ def create_app(config: Config, db: Database, bot: MusicBot) -> FastAPI:
         if body.channel_id and not (body.channel_id.isdigit()
                                     and isinstance(guild.get_channel(int(body.channel_id)), discord.TextChannel)):
             raise HTTPException(400, "Text channel not found")
+        if body.dj_hours and body.dj_hours.from_ == body.dj_hours.to:
+            raise HTTPException(400, "Start and end time must differ")
         new = {
             "disabled": sorted(set(body.disabled)),
             "dj_role_id": body.dj_role_id or None,
@@ -362,6 +370,7 @@ def create_app(config: Config, db: Database, bot: MusicBot) -> FastAPI:
             "channel_id": body.channel_id or None,
             "normalize": body.normalize,
             "presence": body.presence,
+            "dj_hours": {"from": body.dj_hours.from_, "to": body.dj_hours.to} if body.dj_hours else None,
         }
         old = bot.settings
         try:
